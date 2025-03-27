@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:galsen_medic/screens/home_admin.dart';
 
 void main() {
+  print("🔥 Main exécuté !");
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -31,6 +32,7 @@ class GalsenMedicApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("✅ HomeAdminPage chargé !");
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'GalsenMedic',
