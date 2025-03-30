@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:galsen_medic/screens/splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:galsen_medic/screens/home_admin.dart';
 
 void main() {
   print("🔥 Main exécuté !");
@@ -28,7 +28,7 @@ void main() {
 }
 
 class GalsenMedicApp extends StatelessWidget {
-  const GalsenMedicApp({Key? key}) : super(key: key);
+  const GalsenMedicApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +50,13 @@ class GalsenMedicApp extends StatelessWidget {
       // ✅ Gérer le text scaling global (accessibilité)
       builder: (context, child) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(1.0)),
           child: child!,
         );
       },
-
-      home: const HomeAdminPage(),
+      home: const SplashScreen(),
     );
   }
 }

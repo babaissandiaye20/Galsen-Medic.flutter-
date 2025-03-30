@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:galsen_medic/screens/utilisateur_patient_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:galsen_medic/screens/widgets/custom_bottom_nav.dart';
+import 'package:galsen_medic/screens/widgets/custom_item_card.dart';
+import 'package:galsen_medic/screens/utilisateur_page.dart';
 
 class HomeAdminPage extends StatefulWidget {
-  const HomeAdminPage({Key? key}) : super(key: key);
+  const HomeAdminPage({super.key});
 
   @override
-  _HomeAdminPageState createState() => _HomeAdminPageState();
+  State<HomeAdminPage> createState() => _HomeAdminPageState();
 }
 
 class _HomeAdminPageState extends State<HomeAdminPage> {
@@ -20,34 +24,42 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
             _buildSearchBar(),
             _buildQuickActions(),
             Expanded(child: _buildTransactionHistory()),
-            _buildBottomNavBar(),
           ],
         ),
       ),
+      bottomNavigationBar: const CustomBottomNavBar(activeIndex: 0),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          RichText(
-            text: TextSpan(
-              style: GoogleFonts.inter(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Galsen',
+                style: GoogleFonts.inter(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
-              children: const [
-                TextSpan(text: 'Galsen', style: TextStyle(color: Colors.black)),
-                TextSpan(text: 'Medic', style: TextStyle(color: Colors.teal)),
-              ],
-            ),
+              Text(
+                'Medic',
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.teal,
+                ),
+              ),
+            ],
           ),
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(Icons.notifications_none_outlined, size: 28),
             onPressed: () {},
           ),
         ],
@@ -57,15 +69,14 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
         decoration: InputDecoration(
           hintText: 'Search doctor, drugs, articles...',
           hintStyle: GoogleFonts.inter(),
           prefixIcon: const Icon(Icons.search),
           filled: true,
-          fillColor: Colors.grey[100],
+          fillColor: Colors.white,
           contentPadding: const EdgeInsets.symmetric(vertical: 0),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
@@ -77,48 +88,49 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
   }
 
   Widget _buildQuickActions() {
-    final List<Map<String, Object>> actions = [
-      {'icon': Icons.person_outline, 'label': 'Utilisateur(s)'},
-      {'icon': Icons.medical_services_outlined, 'label': 'Service(s)'},
-      {'icon': Icons.attach_money, 'label': 'Tarifs'},
-      {'icon': Icons.people_outline, 'label': 'Patient(s)'},
-    ];
-
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children:
-            actions.map((action) {
-              return Column(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.grey[100],
-                    radius: 24,
-                    child: Icon(
-                      action['icon'] as IconData,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    action['label'] as String,
-                    style: GoogleFonts.inter(fontSize: 12),
-                  ),
-                ],
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CustomItemCard(
+            icon: Icons.person_outline,
+            label: 'Utilisateur(s)',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => UtilisateurPage()),
               );
-            }).toList(),
+            },
+          ),
+          CustomItemCard(
+            icon: Icons.medical_services_outlined,
+            label: 'Service(s)',
+          ),
+          CustomItemCard(icon: Icons.attach_money, label: 'Tarifs'),
+          CustomItemCard(
+            icon: Icons.people_outline,
+            label: 'Patient(s)',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const UtilisateurPatientPage(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTransactionHistory() {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -131,14 +143,17 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
               ),
               TextButton(
                 onPressed: () {},
-                child: Text('See all', style: GoogleFonts.inter()),
+                child: Text(
+                  'See all',
+                  style: GoogleFonts.inter(color: Colors.teal),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Expanded(
             child: ListView.builder(
-              itemCount: 8,
+              itemCount: 6,
               itemBuilder: (context, index) {
                 return _buildTransactionItem();
               },
@@ -154,17 +169,24 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
-              'assets/images/Rectangle460.png',
-              width: 48,
-              height: 48,
+              'assets/images/icon.png',
+              width: 60,
+              height: 60,
               fit: BoxFit.cover,
             ),
           ),
@@ -175,61 +197,28 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
               children: [
                 Text(
                   'Paiement Laboratoire/Biochimie',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '2000 F CFA',
+                  '2000 F cfa',
                   style: GoogleFonts.inter(
                     color: Colors.teal,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   'Jun 10, 2021 • 12:59',
-                  style: GoogleFonts.inter(color: Colors.grey, fontSize: 12),
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.home_outlined, 'Home', true),
-          _buildNavItem(Icons.mail_outline, 'Messages', false),
-          _buildNavItem(Icons.calendar_today_outlined, 'Calendar', false),
-          _buildNavItem(Icons.person_outline, 'Profile', false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: isActive ? Colors.teal : Colors.grey),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            color: isActive ? Colors.teal : Colors.grey,
-          ),
-        ),
-      ],
     );
   }
 }
