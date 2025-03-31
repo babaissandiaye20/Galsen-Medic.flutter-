@@ -11,6 +11,7 @@ class AuthService {
       final response = await _apiService.post(
         '/auth/login',
         authModel.toJson(),
+        withAuth: false,
       );
 
       final token = response['data']['access_token'];
@@ -35,7 +36,6 @@ class AuthService {
     await prefs.remove('token');
   }
 
-  // Decode JWT and return payload as Map
   Map<String, dynamic> decodeJwtPayload(String token) {
     final parts = token.split('.');
     if (parts.length != 3) {

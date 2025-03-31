@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:galsen_medic/screens/services_page.dart';
 import 'package:galsen_medic/screens/utilisateur_patient_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:galsen_medic/screens/widgets/custom_bottom_nav.dart';
@@ -106,7 +107,14 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
           CustomItemCard(
             icon: Icons.medical_services_outlined,
             label: 'Service(s)',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ServicesPage()),
+              );
+            },
           ),
+
           CustomItemCard(icon: Icons.attach_money, label: 'Tarifs'),
           CustomItemCard(
             icon: Icons.people_outline,

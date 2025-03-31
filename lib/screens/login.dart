@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:galsen_medic/screens/home_admin.dart';
+import 'package:galsen_medic/screens/onboarding.dart';
+import 'package:galsen_medic/screens/register.dart';
 import 'package:galsen_medic/screens/widgets/toastifiee.dart';
 import 'package:galsen_medic/services/auth_service.dart';
 import 'package:galsen_medic/models/auth_model.dart';
@@ -21,12 +24,25 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: BackButton(
+          color: Colors.black,
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const OnboardingPage()),
+            );
+          },
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: ListView(
             children: [
-              const SizedBox(height: 64),
+              const SizedBox(height: 40),
               Center(
                 child: Image.asset('assets/images/Vector.png', height: 72),
               ),
@@ -98,11 +114,21 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextSpan(
                         text: "Sign Up",
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Color(0xFF20D114),
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
                         ),
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const RegisterPage(),
+                                  ),
+                                );
+                              },
                       ),
                     ],
                   ),
@@ -128,7 +154,9 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  // Google Sign-In logic
+                },
                 child: Container(
                   height: 56,
                   decoration: BoxDecoration(
@@ -171,6 +199,7 @@ class _LoginPageState extends State<LoginPage> {
   }) {
     return Container(
       height: 56,
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFFF9F9FB),
         borderRadius: BorderRadius.circular(24),
@@ -234,7 +263,7 @@ class _LoginPageState extends State<LoginPage> {
       if (token == null) return;
 
       final payload = auth.decodeJwtPayload(token);
-      final privilege = payload['privilege']; // ex: 1 pour Admin
+      final privilege = payload['privilege'];
 
       if (privilege == 1) {
         Navigator.pushReplacement(
@@ -242,7 +271,7 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (_) => const HomeAdminPage()),
         );
       } else {
-        // Redirection autre ici si besoin
+        // Redirection si autre rôle (ex: Client)
       }
     } else {
       Toastifiee.show(
