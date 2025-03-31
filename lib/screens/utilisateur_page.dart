@@ -75,6 +75,10 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
                     fullName: "${user.prenom} ${user.nom}",
                     role: user.privilege.libelle,
                     imageUrl: user.profilUrl ?? '',
+                    email: user.email,
+                    phone: user.telephone ?? '',
+                    subService: '', // Pas besoin ici
+                    minimal: true, // ← Version minimal pour la liste
                     onTap: () {
                       Navigator.push(
                         context,
@@ -85,6 +89,7 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
                                 role: user.privilege.libelle,
                                 imageUrl: user.profilUrl ?? '',
                                 email: user.email,
+                                phone: user.telephone ?? '',
                               ),
                         ),
                       );

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:galsen_medic/screens/home_admin.dart';
+import 'package:galsen_medic/screens/login.dart'; // 🔁 ← redirige ici maintenant
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,7 +23,6 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // 🟢 Animation du texte avec effet pulse répétitif
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -33,7 +32,6 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // 🟡 Bandes animées
     _curveController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -47,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
     Timer(const Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeAdminPage()),
+        MaterialPageRoute(builder: (_) => const LoginPage()), // 🔁 ici
       );
     });
   }
@@ -66,7 +64,6 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // 🎨 Courbes avec animation
           if (_showCurves)
             AnimatedBuilder(
               animation: _curveController,
@@ -78,8 +75,6 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
             ),
-
-          // ⭐ Étoile bien visible
           if (_showCurves)
             Positioned(
               left: screen.width * 0.34,
@@ -94,8 +89,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
             ),
-
-          // 📝 Texte animé avec effet pulse
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
@@ -164,15 +157,14 @@ class CurvedSplashPainter extends CustomPainter {
 
     final offset = size.width * 0.3;
 
-    // ✅ Bandes larges avec épaisseur augmentée
-    drawBand(const Color(0xFF20D114), offset - 75, 45, false); // vert large
-    drawBand(const Color(0xFF20D114), offset - 75, 45, true); // vert fine
+    drawBand(const Color(0xFF20D114), offset - 75, 45, false);
+    drawBand(const Color(0xFF20D114), offset - 75, 45, true);
 
-    drawBand(const Color(0xFFFECB00), offset - 20, 45, false); // jaune large
-    drawBand(const Color(0xFFFECB00), offset - 20, 45, true); // jaune fine
+    drawBand(const Color(0xFFFECB00), offset - 20, 45, false);
+    drawBand(const Color(0xFFFECB00), offset - 20, 45, true);
 
-    drawBand(const Color(0xFFF70404), offset + 40, 55, false); // rouge large
-    drawBand(const Color(0xFFF70404), offset + 40, 55, true); // rouge fine
+    drawBand(const Color(0xFFF70404), offset + 40, 55, false);
+    drawBand(const Color(0xFFF70404), offset + 40, 55, true);
   }
 
   @override

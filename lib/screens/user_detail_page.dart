@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:galsen_medic/screens/widgets/custom_bottom_nav.dart';
 import 'package:galsen_medic/screens/user_info_card.dart' as card;
+import 'package:galsen_medic/screens/weekly_calendar.dart';
+import 'package:galsen_medic/screens/consultation_en_cours_widget.dart';
 
 class UserDetailPage extends StatelessWidget {
   final String fullName;
   final String role;
   final String imageUrl;
   final String email;
+  final String phone;
 
   const UserDetailPage({
     super.key,
@@ -14,7 +17,10 @@ class UserDetailPage extends StatelessWidget {
     required this.role,
     required this.imageUrl,
     required this.email,
+    required this.phone,
   });
+
+  bool get isMedecin => role.toLowerCase().contains('médecin');
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +31,7 @@ class UserDetailPage extends StatelessWidget {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: const Text(
-          'Utilisateur(s)',
+          'Utilisateur',
           style: TextStyle(
             color: Color(0xFF101623),
             fontSize: 16,
@@ -49,6 +55,9 @@ class UserDetailPage extends StatelessWidget {
               fullName: fullName,
               role: role,
               imageUrl: imageUrl,
+              email: email,
+              phone: phone,
+              subService: isMedecin ? 'Cardiologie' : '',
             ),
             const SizedBox(height: 24),
             const Text(
@@ -79,6 +88,28 @@ class UserDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildInfoRow('Email', email),
+            _buildInfoRow('Téléphone', phone),
+            if (isMedecin) _buildInfoRow('Sous-service', 'Cardiologie'),
+            const SizedBox(height: 24),
+
+            // Affichage conditionnel ici
+            isMedecin
+                ? const WeeklyCalendar()
+                : const ConsultationEnCoursWidget(),
+
+            const SizedBox(height: 24),
+            if (!isMedecin)
+              const Text(
+                'Dossiers médicaux',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF101623),
+                ),
+              ),
+            if (!isMedecin) const SizedBox(height: 12),
+            if (!isMedecin) _buildInfoRow('Email', email),
+            if (!isMedecin) _buildInfoRow('Téléphone', phone),
           ],
         ),
       ),

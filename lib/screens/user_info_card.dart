@@ -4,14 +4,22 @@ class UserInfoCard extends StatelessWidget {
   final String imageUrl;
   final String fullName;
   final String role;
+  final String email;
+  final String phone;
+  final String subService;
   final VoidCallback? onTap;
+  final bool minimal;
 
   const UserInfoCard({
     super.key,
     required this.imageUrl,
     required this.fullName,
     required this.role,
+    required this.email,
+    required this.phone,
+    required this.subService,
     this.onTap,
+    this.minimal = false,
   });
 
   @override
@@ -33,8 +41,7 @@ class UserInfoCard extends StatelessWidget {
               child:
                   imageUrl.isNotEmpty
                       ? FadeInImage.assetNetwork(
-                        placeholder:
-                            'assets/images/avatar_placeholder.png', // tu peux mettre une image de profil par défaut
+                        placeholder: 'assets/images/avatar_placeholder.png',
                         image: imageUrl,
                         width: 50,
                         height: 50,
@@ -65,6 +72,34 @@ class UserInfoCard extends StatelessWidget {
                       color: Color(0xFFADADAD),
                     ),
                   ),
+                  if (!minimal) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      email,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFFADADAD),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      phone,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFFADADAD),
+                      ),
+                    ),
+                    if (subService.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        subService,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFADADAD),
+                        ),
+                      ),
+                    ],
+                  ],
                 ],
               ),
             ),
