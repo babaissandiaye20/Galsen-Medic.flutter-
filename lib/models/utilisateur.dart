@@ -5,6 +5,13 @@ class Privilege {
   Privilege({required this.id, required this.libelle});
 
   factory Privilege.fromJson(Map<String, dynamic> json) {
+    print("⚙️ JSON reçu pour Privilege: $json");
+
+    if (json['id'] == null || json['libelle'] == null) {
+      print("⚠️ Données incomplètes pour Privilege : $json");
+      return Privilege(id: 0, libelle: "Inconnu");
+    }
+
     return Privilege(id: json['id'], libelle: json['libelle']);
   }
 }
@@ -31,6 +38,12 @@ class Utilisateur {
   });
 
   factory Utilisateur.fromJson(Map<String, dynamic> json) {
+    print("🔍 JSON reçu pour Utilisateur: $json");
+
+    if (json['privilege'] == null) {
+      print("❌ ATTENTION : Le champ 'privilege' est NULL !");
+    }
+
     return Utilisateur(
       id: json['id'],
       nom: json['nom'],
@@ -39,7 +52,23 @@ class Utilisateur {
       telephone: json['telephone'],
       profil: json['profil'],
       profilUrl: json['profilUrl'],
-      privilege: Privilege.fromJson(json['privilege']),
+      privilege:
+          json['privilege'] != null
+              ? Privilege.fromJson(json['privilege'])
+              : Privilege(id: 0, libelle: 'Inconnu'),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nom': nom,
+      'prenom': prenom,
+      'email': email,
+      'telephone': telephone,
+      'profil': profil,
+      'profilUrl': profilUrl,
+      'privilege': {'id': privilege.id, 'libelle': privilege.libelle},
+    };
   }
 }

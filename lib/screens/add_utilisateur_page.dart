@@ -85,6 +85,8 @@ class _AddUtilisateurPageState extends State<AddUtilisateurPage> {
         image: _image,
       );
 
+      print("🧾 Utilisateur créé: ${user.toJson()}");
+
       if (!mounted) return;
       Navigator.pop(context); // Ferme le loader
 
@@ -93,12 +95,13 @@ class _AddUtilisateurPageState extends State<AddUtilisateurPage> {
         message: "Utilisateur ajouté",
         success: true,
       );
+
       Provider.of<UtilisateurProvider>(
         context,
         listen: false,
       ).addUtilisateur(user);
 
-      // ✅ Redirection en fonction du rôle
+      // Redirection en fonction du rôle
       if (user.privilege.libelle == 'Client') {
         Navigator.pushReplacement(
           context,
