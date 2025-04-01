@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:galsen_medic/config/env.dart';
@@ -71,15 +72,28 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  Future<bool> ping() async {
-    try {
-      final url = Uri.parse('$baseUrl/ping');
-      final response = await http.get(url);
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Ping failed: $e');
-      return false;
+  Future<dynamic> multipartPost({
+    required String endpoint,
+    required Map<String, String> fields,
+    required List<http.MultipartFile> files,
+  }) async {
+    final url = Uri.parse('$baseUrl$endpoint');
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final request = http.MultipartRequest('POST', url);
+    request.fields.addAll(fields);
+
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
     }
+
+    request.files.addAll(files);
+
+    final streamedResponse = await request.send();
+    final httpResponse = await http.Response.fromStream(streamedResponse);
+
+    return _handleResponse(httpResponse);
   }
 
   dynamic _handleResponse(http.Response response) {
@@ -90,6 +104,17 @@ class ApiService {
       return jsonDecode(body);
     } else {
       throw Exception('Request failed: $statusCode → $body');
+    }
+  }
+
+  Future<bool> ping() async {
+    try {
+      final url = Uri.parse('$baseUrl/ping');
+      final response = await http.get(url);
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Ping failed: $e');
+      return false;
     }
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart'; // Pour basename
+import 'package:http_parser/http_parser.dart'; // Pour MediaType
 import 'package:galsen_medic/services/api_service.dart';
 
 class RegisterClientService {
@@ -18,12 +18,15 @@ class RegisterClientService {
 
     var request = http.MultipartRequest('POST', url);
 
+    // Champs principaux
     request.fields['nom'] = nom;
     request.fields['prenom'] = prenom;
     request.fields['email'] = email;
     request.fields['password'] = password;
     request.fields['telephone'] = telephone;
+    request.fields['idPrivilege'] = '2'; // Client par défaut
 
+    // Ajout de l'image si présente
     if (image != null) {
       final ext = extension(image.path).toLowerCase();
       final fileSize = await image.length();

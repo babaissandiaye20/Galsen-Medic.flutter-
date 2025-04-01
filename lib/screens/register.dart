@@ -96,11 +96,29 @@ class _RegisterPageState extends State<RegisterPage> {
         });
       } else {
         final body = jsonDecode(response.body);
-        Toastifiee.show(
-          context: context,
-          message: body['message'] ?? "Erreur lors de l'inscription",
-          success: false,
-        );
+
+        if (body is Map<String, dynamic> && body.containsKey('errors')) {
+          final errors = body['errors'];
+          if (errors is List && errors.isNotEmpty) {
+            Toastifiee.show(
+              context: context,
+              message: errors.first.toString(),
+              success: false,
+            );
+          } else {
+            Toastifiee.show(
+              context: context,
+              message: body['message'] ?? "Erreur inconnue",
+              success: false,
+            );
+          }
+        } else {
+          Toastifiee.show(
+            context: context,
+            message: body['message'] ?? "Erreur lors de l'inscription",
+            success: false,
+          );
+        }
       }
     } catch (e) {
       Navigator.pop(context);

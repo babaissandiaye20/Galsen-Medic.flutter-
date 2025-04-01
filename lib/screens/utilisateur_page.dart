@@ -4,6 +4,7 @@ import 'package:galsen_medic/services/utilisateur_service.dart';
 import 'package:galsen_medic/screens/widgets/custom_bottom_nav.dart';
 import 'package:galsen_medic/screens/user_info_card.dart' as card;
 import 'package:galsen_medic/screens/user_detail_page.dart';
+import 'package:galsen_medic/screens/add_utilisateur_page.dart'; // ← le formulaire ici
 
 class UtilisateurPage extends StatefulWidget {
   const UtilisateurPage({super.key});
@@ -37,6 +38,22 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
     }
   }
 
+  void _showAddUserForm() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (_) => const Padding(
+            padding: EdgeInsets.only(bottom: 32, left: 16, right: 16, top: 16),
+            child: SingleChildScrollView(child: AddUtilisateurPage()),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,10 +67,27 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: Colors.black),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Icon(Icons.more_vert, color: Colors.black),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.black),
+            onSelected: (value) {
+              if (value == 'add') {
+                _showAddUserForm(); // ← Affiche le formulaire
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'add',
+                    child: Row(
+                      children: [
+                        Icon(Icons.add, color: Colors.black),
+                        SizedBox(width: 8),
+                        Text('Ajouter utilisateur'),
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
@@ -77,8 +111,8 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
                     imageUrl: user.profilUrl ?? '',
                     email: user.email,
                     phone: user.telephone ?? '',
-                    subService: '', // Pas besoin ici
-                    minimal: true, // ← Version minimal pour la liste
+                    subService: '',
+                    minimal: true,
                     onTap: () {
                       Navigator.push(
                         context,
