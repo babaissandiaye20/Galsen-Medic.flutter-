@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:galsen_medic/provider/service_provider.dart';
+import 'package:galsen_medic/provider/sous_service_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -35,10 +37,11 @@ class GalsenMedicApp extends StatelessWidget {
     print("✅ HomeAdminPage chargé !");
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => UtilisateurProvider(),
-        ), // ✅ Ajout du provider ici
+        ChangeNotifierProvider(create: (_) => UtilisateurProvider()),
+        ChangeNotifierProvider(create: (_) => ServiceProvider()),
+        ChangeNotifierProvider(create: (_) => SousServiceProvider()),
       ],
+
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'GalsenMedic',
