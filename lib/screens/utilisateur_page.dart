@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:galsen_medic/models/utilisateur.dart';
-import 'package:galsen_medic/services/utilisateur_service.dart';
+import 'package:provider/provider.dart';
+import 'package:galsen_medic/provider/utilisateur_provider.dart';
 import 'package:galsen_medic/screens/widgets/custom_bottom_nav.dart';
 import 'package:galsen_medic/screens/user_info_card.dart' as card;
 import 'package:galsen_medic/screens/user_detail_page.dart';
-import 'package:galsen_medic/screens/add_utilisateur_page.dart'; // ← le formulaire ici
+import 'package:galsen_medic/screens/add_utilisateur_page.dart';
 
 class UtilisateurPage extends StatefulWidget {
   const UtilisateurPage({super.key});
@@ -14,48 +14,30 @@ class UtilisateurPage extends StatefulWidget {
 }
 
 class _UtilisateurPageState extends State<UtilisateurPage> {
-  final UtilisateurService _service = UtilisateurService();
-  List<Utilisateur> utilisateurs = [];
-  bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    fetchUtilisateurs();
-  }
-
-  Future<void> fetchUtilisateurs() async {
-    try {
-      final result = await _service.getUsersWithoutAdminAndClient();
-      setState(() {
-        utilisateurs = result;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    Future.microtask(() {
+      Provider.of<UtilisateurProvider>(
+        context,
+        listen: false,
+      ).fetchUtilisateurs();
+    });
   }
 
   void _showAddUserForm() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder:
-          (_) => const Padding(
-            padding: EdgeInsets.only(bottom: 32, left: 16, right: 16, top: 16),
-            child: SingleChildScrollView(child: AddUtilisateurPage()),
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AddUtilisateurPage()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<UtilisateurProvider>(context);
+    final utilisateurs = provider.utilisateurs;
+    final isLoading = provider.isLoading;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
@@ -72,7 +54,7 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
             icon: const Icon(Icons.more_vert, color: Colors.black),
             onSelected: (value) {
               if (value == 'add') {
-                _showAddUserForm(); // ← Affiche le formulaire
+                _showAddUserForm();
               }
             },
             itemBuilder:
@@ -95,7 +77,7 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : utilisateurs.isEmpty
-              ? const Center(child: Text('Aucun utilisateur trouvé.'))
+              ? const Center(child: Text("Aucun utilisateur trouvé."))
               : ListView.builder(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -104,7 +86,6 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
                 itemCount: utilisateurs.length,
                 itemBuilder: (context, index) {
                   final user = utilisateurs[index];
-
                   return card.UserInfoCard(
                     fullName: "${user.prenom} ${user.nom}",
                     role: user.privilege.libelle,

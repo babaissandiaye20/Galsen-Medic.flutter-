@@ -25,7 +25,7 @@ class _UtilisateurPatientPageState extends State<UtilisateurPatientPage> {
 
   Future<void> fetchPatients() async {
     try {
-      final result = await _service.getClients(); // Appel direct aux clients
+      final result = await _service.getClients();
       setState(() {
         patients = result;
         isLoading = false;
@@ -75,9 +75,8 @@ class _UtilisateurPatientPageState extends State<UtilisateurPatientPage> {
                     role: patient.privilege.libelle,
                     imageUrl: patient.profilUrl ?? '',
                     email: patient.email,
-                    phone:
-                        patient.telephone ?? '', // Utilisation de 'telephone'
-                    subService: '', // Les patients n'ont pas de sous-service
+                    phone: patient.telephone ?? '',
+                    subService: '',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -88,9 +87,7 @@ class _UtilisateurPatientPageState extends State<UtilisateurPatientPage> {
                                 role: patient.privilege.libelle,
                                 imageUrl: patient.profilUrl ?? '',
                                 email: patient.email,
-                                phone:
-                                    patient.telephone ??
-                                    '', // Utilisation de 'telephone'
+                                phone: patient.telephone ?? '',
                               ),
                         ),
                       );

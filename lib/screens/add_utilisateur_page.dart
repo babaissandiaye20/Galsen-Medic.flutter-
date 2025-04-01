@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:galsen_medic/services/utilisateur_service.dart';
 import 'package:galsen_medic/screens/widgets/form.dart';
+import 'package:galsen_medic/screens/widgets/toastifiee.dart';
+import 'package:galsen_medic/services/utilisateur_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:galsen_medic/provider/utilisateur_provider.dart';
-import 'package:galsen_medic/screens/widgets/toastifiee.dart';
+import 'package:galsen_medic/screens/utilisateur_page.dart';
+import 'package:galsen_medic/screens/utilisateur_patient_page.dart';
 
 class AddUtilisateurPage extends StatefulWidget {
   const AddUtilisateurPage({super.key});
@@ -21,10 +24,12 @@ class _AddUtilisateurPageState extends State<AddUtilisateurPage> {
   final _telephone = TextEditingController();
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
+
   int? _selectedPrivilegeId;
-  File? _image;
-  final _service = UtilisateurService();
   List<Map<String, dynamic>> _privileges = [];
+  File? _image;
+
+  final _service = UtilisateurService();
 
   @override
   void initState() {
@@ -34,17 +39,12 @@ class _AddUtilisateurPageState extends State<AddUtilisateurPage> {
 
   Future<void> _loadPrivileges() async {
     final res = await _service.getPrivileges();
-    setState(() {
-      _privileges = res;
-    });
+    setState(() => _privileges = res);
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _image = File(picked.path));
-    }
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null) setState(() => _image = File(picked.path));
   }
 
   void _removeImage() => setState(() => _image = null);
@@ -85,126 +85,189 @@ class _AddUtilisateurPageState extends State<AddUtilisateurPage> {
         image: _image,
       );
 
-      if (mounted) {
-        Navigator.pop(context); // Close loading
-        Toastifiee.show(
-          context: context,
-          message: "Utilisateur ajouté",
-          success: true,
-        );
-        Provider.of<UtilisateurProvider>(
+      if (!mounted) return;
+      Navigator.pop(context); // Ferme le loader
+
+      Toastifiee.show(
+        context: context,
+        message: "Utilisateur ajouté",
+        success: true,
+      );
+      Provider.of<UtilisateurProvider>(
+        context,
+        listen: false,
+      ).addUtilisateur(user);
+
+      // ✅ Redirection en fonction du rôle
+      if (user.privilege.libelle == 'Client') {
+        Navigator.pushReplacement(
           context,
-          listen: false,
-        ).addUtilisateur(user);
-        Navigator.pop(context); // Ferme le bottom sheet
+          MaterialPageRoute(builder: (_) => const UtilisateurPatientPage()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const UtilisateurPage()),
+        );
       }
     } catch (e) {
-      Navigator.pop(context); // Close loading
-      Toastifiee.show(context: context, message: e.toString(), success: false);
+      Navigator.pop(context); // Ferme le loader
+      String message = "Une erreur est survenue";
+
+      try {
+        final parsed = jsonDecode(e.toString().replaceAll('Exception: ', ''));
+        if (parsed is Map && parsed['message'] != null) {
+          message = parsed['message'];
+        }
+      } catch (_) {
+        message = e.toString().replaceAll('Exception: ', '');
+      }
+
+      Toastifiee.show(context: context, message: message, success: false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // important
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 40,
-                height: 4,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Ajouter un utilisateur"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          children: [
+            CustomFormField(
+              hintText: 'Nom',
+              icon: Icons.person,
+              controller: _nom,
+            ),
+            CustomFormField(
+              hintText: 'Prénom',
+              icon: Icons.person,
+              controller: _prenom,
+            ),
+            CustomFormField(
+              hintText: 'Email',
+              icon: Icons.email,
+              controller: _email,
+            ),
+            CustomFormField(
+              hintText: 'Téléphone',
+              icon: Icons.phone,
+              controller: _telephone,
+            ),
+            CustomFormField(
+              hintText: 'Mot de passe',
+              icon: Icons.lock,
+              controller: _password,
+              obscureText: true,
+            ),
+            CustomFormField(
+              hintText: 'Confirmer le mot de passe',
+              icon: Icons.lock_outline,
+              controller: _confirmPassword,
+              obscureText: true,
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<int>(
+              value: _selectedPrivilegeId,
+              hint: const Text("Choisir un privilège"),
+              items:
+                  _privileges.map<DropdownMenuItem<int>>((p) {
+                    return DropdownMenuItem(
+                      value: p['id'],
+                      child: Text(p['libelle']),
+                    );
+                  }).toList(),
+              onChanged:
+                  (value) => setState(() => _selectedPrivilegeId = value),
+            ),
+            const SizedBox(height: 16),
+            _buildImageUploader(),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: _handleSubmit,
+              child: Container(
+                height: 56,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xFF20D114),
+                  borderRadius: BorderRadius.circular(32),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                "Ajouter un utilisateur",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              CustomFormField(
-                hintText: 'Nom',
-                icon: Icons.person,
-                controller: _nom,
-              ),
-              CustomFormField(
-                hintText: 'Prénom',
-                icon: Icons.person,
-                controller: _prenom,
-              ),
-              CustomFormField(
-                hintText: 'Email',
-                icon: Icons.email,
-                controller: _email,
-              ),
-              CustomFormField(
-                hintText: 'Téléphone',
-                icon: Icons.phone,
-                controller: _telephone,
-              ),
-              CustomFormField(
-                hintText: 'Mot de passe',
-                icon: Icons.lock,
-                controller: _password,
-                obscureText: true,
-              ),
-              CustomFormField(
-                hintText: 'Confirmer le mot de passe',
-                icon: Icons.lock_outline,
-                controller: _confirmPassword,
-                obscureText: true,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<int>(
-                value: _selectedPrivilegeId,
-                hint: const Text("Choisir un privilège"),
-                items:
-                    _privileges.map<DropdownMenuItem<int>>((p) {
-                      return DropdownMenuItem<int>(
-                        value: p['id'] as int,
-                        child: Text(p['libelle']),
-                      );
-                    }).toList(),
-                onChanged:
-                    (value) => setState(() => _selectedPrivilegeId = value),
-              ),
-              const SizedBox(height: 12),
-              _image == null
-                  ? ElevatedButton.icon(
-                    onPressed: _pickImage,
-                    icon: const Icon(Icons.image),
-                    label: const Text("Ajouter une image"),
-                  )
-                  : Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      Image.file(_image!, height: 200, fit: BoxFit.cover),
-                      IconButton(
-                        onPressed: _removeImage,
-                        icon: const Icon(Icons.close, color: Colors.red),
-                      ),
-                    ],
+                child: const Center(
+                  child: Text(
+                    'Créer',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF20D114),
-                ),
-                child: const Text(
-                  "Créer",
-                  style: TextStyle(color: Colors.white),
                 ),
               ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageUploader() {
+    return GestureDetector(
+      onTap: _image == null ? _pickImage : null,
+      child: Container(
+        height: 250,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9F9FB),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Stack(
+          children: [
+            Center(
+              child:
+                  _image == null
+                      ? const Icon(
+                        Icons.upload_file,
+                        size: 40,
+                        color: Colors.grey,
+                      )
+                      : ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.file(
+                          _image!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                      ),
+            ),
+            if (_image != null)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: _removeImage,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
