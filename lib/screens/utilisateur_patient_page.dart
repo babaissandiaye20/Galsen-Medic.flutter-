@@ -57,44 +57,42 @@ class _UtilisateurPatientPageState extends State<UtilisateurPatientPage> {
           ),
         ],
       ),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : patients.isEmpty
-              ? const Center(child: Text('Aucun patient trouvé.'))
-              : ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                itemCount: patients.length,
-                itemBuilder: (context, index) {
-                  final patient = patients[index];
-                  return card.UserInfoCard(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : patients.isEmpty
+          ? const Center(child: Text('Aucun patient trouvé.'))
+          : ListView.builder(
+        padding:
+        const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        itemCount: patients.length,
+        itemBuilder: (context, index) {
+          final patient = patients[index];
+
+          return card.UserInfoCard(
+            fullName: "${patient.prenom} ${patient.nom}",
+            role: patient.privilege.libelle,
+            imageUrl: patient.profilUrl ?? '',
+            email: patient.email,
+            phone: patient.telephone ?? '',
+            subService: '',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UserDetailPage(
                     fullName: "${patient.prenom} ${patient.nom}",
                     role: patient.privilege.libelle,
                     imageUrl: patient.profilUrl ?? '',
                     email: patient.email,
                     phone: patient.telephone ?? '',
-                    subService: '',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => UserDetailPage(
-                                fullName: "${patient.prenom} ${patient.nom}",
-                                role: patient.privilege.libelle,
-                                imageUrl: patient.profilUrl ?? '',
-                                email: patient.email,
-                                phone: patient.telephone ?? '',
-                              ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                    idMedecin: 0, // 👈 ce n’est pas un médecin
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
       bottomNavigationBar: const CustomBottomNavBar(activeIndex: 0),
     );
   }

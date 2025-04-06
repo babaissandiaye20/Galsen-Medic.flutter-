@@ -1,10 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:galsen_medic/provider/disponibilite_provider.dart';
+import 'package:galsen_medic/models/disponibilite_model.dart';
 
-class WeeklyCalendar extends StatelessWidget {
-  const WeeklyCalendar({super.key});
+class WeeklyCalendar extends StatefulWidget {
+  final int idMedecin;
+
+  const WeeklyCalendar({super.key, required this.idMedecin});
+
+  @override
+  State<WeeklyCalendar> createState() => _WeeklyCalendarState();
+}
+
+class _WeeklyCalendarState extends State<WeeklyCalendar> {
+  String selectedDay = '';
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<DisponibiliteProvider>(context, listen: false)
+          .fetchDisponibilites(widget.idMedecin);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<DisponibiliteProvider>(context);
+    final disponibilites = provider.disponibilites;
+
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (disponibilites.isEmpty) {
+      return const Center(child: Text("Aucune disponibilité trouvée."));
+    }
+
+    selectedDay = selectedDay.isEmpty
+        ? disponibilites.first.jourSemaine
+        : selectedDay;
+
+    final jours = disponibilites.map((e) => e.jourSemaine).toList();
+    final current = disponibilites.firstWhere(
+          (d) => d.jourSemaine == selectedDay,
+      orElse: () => disponibilites.first,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -17,107 +59,86 @@ class WeeklyCalendar extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-
-        // === Jours de la semaine ===
         SizedBox(
           height: 80,
-          child: ListView(
+          child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            children: List.generate(7, (index) {
-              final isToday =
-                  index == 2; // Ex : mercredi sélectionné par défaut
-              final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-              final numbers = ['21', '22', '23', '24', '25', '26', '27'];
+            itemCount: jours.length,
+            itemBuilder: (context, index) {
+              final jour = jours[index];
+              final isSelected = jour == selectedDay;
 
-              return Container(
-                margin: const EdgeInsets.only(right: 8),
-                width: 46,
-                height: 64,
-                decoration: ShapeDecoration(
-                  color: isToday ? const Color(0xFF199A8E) : Colors.white,
-                  shape: RoundedRectangleBorder(
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedDay = jour;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0xFF199A8E) : Colors.white,
                     borderRadius: BorderRadius.circular(15),
-                    side: BorderSide(
+                    border: Border.all(
                       color: const Color(0xFFE8F3F1),
-                      width: isToday ? 0 : 1,
+                      width: isSelected ? 0 : 1,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    _capitalize(jour),
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF101623),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
                     ),
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      days[index],
-                      style: TextStyle(
-                        color: isToday ? Colors.white : const Color(0xFFA0A7B0),
-                        fontSize: 10,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      numbers[index],
-                      style: TextStyle(
-                        color: isToday ? Colors.white : const Color(0xFF101623),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ],
-                ),
               );
-            }),
+            },
           ),
         ),
-
         const SizedBox(height: 24),
-
-        // === Créneaux horaires ===
-        Wrap(spacing: 12, runSpacing: 12, children: _buildTimeSlots()),
+        if (current.horairesDisponibles.isEmpty)
+          const Text("Aucun créneau disponible ce jour-là.")
+        else
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: _buildTimeSlots(current),
+          ),
       ],
     );
   }
 
-  List<Widget> _buildTimeSlots() {
-    final List<Map<String, dynamic>> slots = [
-      {'time': '09:00 AM', 'active': false},
-      {'time': '10:00 AM', 'active': true},
-      {'time': '11:00 AM', 'active': false},
-      {'time': '01:00 PM', 'active': false},
-      {'time': '02:00 PM', 'active': true},
-      {'time': '03:00 PM', 'active': false},
-      {'time': '04:00 PM', 'active': true},
-      {'time': '07:00 PM', 'active': true},
-      {'time': '08:00 PM', 'active': false},
-    ];
-
-    return slots.map((slot) {
-      final isSelected = slot['active'] as bool;
+  List<Widget> _buildTimeSlots(Disponibilite dispo) {
+    return dispo.horairesDisponibles.map((slot) {
       return Container(
         width: 103,
         height: 37,
-        decoration: ShapeDecoration(
-          color: isSelected ? const Color(0xFF199A8E) : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-            side: BorderSide(
-              color: isSelected ? Colors.transparent : const Color(0xFFB3D3CE),
-              width: 1,
-            ),
-          ),
-        ),
         alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color(0xFFB3D3CE)),
+          borderRadius: BorderRadius.circular(15),
+        ),
         child: Text(
-          slot['time'],
-          style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF101623),
+          slot,
+          style: const TextStyle(
             fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            fontFamily: 'Inter',
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF101623),
           ),
         ),
       );
     }).toList();
+  }
+
+  String _capitalize(String value) {
+    return value[0].toUpperCase() + value.substring(1).toLowerCase();
   }
 }

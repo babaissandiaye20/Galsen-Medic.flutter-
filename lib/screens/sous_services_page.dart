@@ -4,6 +4,7 @@ import 'package:galsen_medic/models/sous_service_model.dart';
 import 'package:galsen_medic/provider/sous_service_provider.dart';
 import 'package:galsen_medic/screens/widgets/custom_bottom_nav.dart';
 import 'package:galsen_medic/screens/add_sous_service_page.dart';
+import 'package:galsen_medic/screens/tarif_list_page.dart'; // ✅ IMPORT AJOUTÉ
 
 class SousServicesPage extends StatefulWidget {
   final int serviceId;
@@ -62,44 +63,49 @@ class _SousServicesPageState extends State<SousServicesPage> {
             onSelected: (value) {
               if (value == 'add') _showAddSousServiceForm();
             },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'add',
-                    child: Row(
-                      children: [
-                        Icon(Icons.add, color: Colors.black),
-                        SizedBox(width: 8),
-                        Text('Ajouter sous-service'),
-                      ],
-                    ),
-                  ),
-                ],
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'add',
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text('Ajouter sous-service'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
       backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(14),
-        child:
-            isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : sousServices.isEmpty
-                ? const Center(child: Text("Aucun sous-service disponible."))
-                : Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  children:
-                      sousServices.map((ss) {
-                        return _SousServiceCard(
-                          title: ss.libelle,
-                          imageUrl: ss.iconUrl,
-                          onTap: () {
-                            // Implémenter ce qu'il faut pour aller dans les détails du sous-service
-                          },
-                        );
-                      }).toList(),
-                ),
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : sousServices.isEmpty
+            ? const Center(child: Text("Aucun sous-service disponible."))
+            : Wrap(
+          spacing: 20,
+          runSpacing: 20,
+          children: sousServices.map((ss) {
+            return _SousServiceCard(
+              title: ss.libelle,
+              imageUrl: ss.iconUrl,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TarifListPage(
+                      idSousService: ss.id,
+                      sousServiceName: ss.libelle,
+                    ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
+        ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(activeIndex: 0),
     );
@@ -134,19 +140,19 @@ class _SousServiceCard extends StatelessWidget {
           children: [
             imageUrl != null && imageUrl!.isNotEmpty
                 ? ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    imageUrl!,
-                    height: 64,
-                    width: 64,
-                    fit: BoxFit.cover,
-                  ),
-                )
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                imageUrl!,
+                height: 64,
+                width: 64,
+                fit: BoxFit.cover,
+              ),
+            )
                 : const Icon(
-                  Icons.medical_services_outlined,
-                  size: 48,
-                  color: Colors.grey,
-                ),
+              Icons.medical_services_outlined,
+              size: 48,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 12),
             Text(
               title,

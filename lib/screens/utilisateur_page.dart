@@ -18,10 +18,8 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      Provider.of<UtilisateurProvider>(
-        context,
-        listen: false,
-      ).fetchUtilisateurs();
+      Provider.of<UtilisateurProvider>(context, listen: false)
+          .fetchUtilisateurs();
     });
   }
 
@@ -53,65 +51,61 @@ class _UtilisateurPageState extends State<UtilisateurPage> {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.black),
             onSelected: (value) {
-              if (value == 'add') {
-                _showAddUserForm();
-              }
+              if (value == 'add') _showAddUserForm();
             },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'add',
-                    child: Row(
-                      children: [
-                        Icon(Icons.add, color: Colors.black),
-                        SizedBox(width: 8),
-                        Text('Ajouter utilisateur'),
-                      ],
-                    ),
-                  ),
-                ],
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'add',
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text('Ajouter utilisateur'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : utilisateurs.isEmpty
-              ? const Center(child: Text("Aucun utilisateur trouvé."))
-              : ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                itemCount: utilisateurs.length,
-                itemBuilder: (context, index) {
-                  final user = utilisateurs[index];
-                  return card.UserInfoCard(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : utilisateurs.isEmpty
+          ? const Center(child: Text("Aucun utilisateur trouvé."))
+          : ListView.builder(
+        padding:
+        const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        itemCount: utilisateurs.length,
+        itemBuilder: (context, index) {
+          final user = utilisateurs[index];
+          final isMedecin = user.privilege.libelle.toLowerCase() == 'medecin';
+
+          return card.UserInfoCard(
+            fullName: "${user.prenom} ${user.nom}",
+            role: user.privilege.libelle,
+            imageUrl: user.profilUrl ?? '',
+            email: user.email,
+            phone: user.telephone ?? '',
+            subService: '',
+            minimal: true,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UserDetailPage(
                     fullName: "${user.prenom} ${user.nom}",
                     role: user.privilege.libelle,
                     imageUrl: user.profilUrl ?? '',
                     email: user.email,
                     phone: user.telephone ?? '',
-                    subService: '',
-                    minimal: true,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => UserDetailPage(
-                                fullName: "${user.prenom} ${user.nom}",
-                                role: user.privilege.libelle,
-                                imageUrl: user.profilUrl ?? '',
-                                email: user.email,
-                                phone: user.telephone ?? '',
-                              ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                    idMedecin: isMedecin ? user.id : 0, // 👈 Important
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
       bottomNavigationBar: const CustomBottomNavBar(activeIndex: 0),
     );
   }
