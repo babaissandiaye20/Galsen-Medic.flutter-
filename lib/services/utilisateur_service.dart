@@ -64,4 +64,9 @@ class UtilisateurService {
     final response = await _apiService.get('/privileges');
     return List<Map<String, dynamic>>.from(response['data']);
   }
+  Future<Utilisateur> getUtilisateurByEmail(String email) async {
+    final response = await _apiService.get('/utilisateur/email/$email');
+    return Utilisateur.fromJson(response['data']);
+  }
+
 }

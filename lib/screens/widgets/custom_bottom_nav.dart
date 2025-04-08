@@ -5,6 +5,27 @@ class CustomBottomNavBar extends StatelessWidget {
 
   const CustomBottomNavBar({Key? key, this.activeIndex = 0}) : super(key: key);
 
+  void _handleTap(BuildContext context, int index) {
+    if (index == activeIndex) return;
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/homeAdmin');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/profile');
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Cette section n'est pas encore disponible."),
+            backgroundColor: Colors.teal,
+            duration: Duration(seconds: 2),
+          ),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = [
@@ -26,22 +47,25 @@ class CustomBottomNavBar extends StatelessWidget {
           final item = items[index];
           final bool isActive = index == activeIndex;
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                item['icon'] as IconData,
-                color: isActive ? Colors.teal : Colors.grey,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                item['label'] as String,
-                style: TextStyle(
-                  fontSize: 12,
+          return GestureDetector(
+            onTap: () => _handleTap(context, index),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  item['icon'] as IconData,
                   color: isActive ? Colors.teal : Colors.grey,
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  item['label'] as String,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isActive ? Colors.teal : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
           );
         }),
       ),
